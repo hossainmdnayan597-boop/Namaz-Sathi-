@@ -1,0 +1,6 @@
+{
+  "name": "Namaz Sathi",
+  "description": "Offline native prayer companion with accurate prayer times, Qibla compass, Bengali Namaz learning, Tasbih, and tracker.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

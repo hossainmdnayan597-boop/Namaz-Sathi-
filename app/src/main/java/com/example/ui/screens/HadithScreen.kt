@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import com.example.data.hadith.HadithData
 import com.example.data.hadith.HadithItem
 import com.example.ui.components.AppFooter
+import com.example.ui.theme.AmiriArabicFontFamily
 
 @Composable
 fun HadithScreen() {
@@ -251,8 +252,9 @@ private fun HadithCardItem(hadith: HadithItem) {
                     text = hadith.arabicText,
                     modifier = Modifier.padding(12.dp),
                     style = MaterialTheme.typography.bodyLarge.copy(
-                        fontSize = 17.sp,
-                        lineHeight = 32.sp
+                        fontFamily = AmiriArabicFontFamily,
+                        fontSize = 19.sp,
+                        lineHeight = 36.sp
                     ),
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.End

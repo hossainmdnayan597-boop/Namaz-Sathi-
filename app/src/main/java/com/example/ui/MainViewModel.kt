@@ -12,6 +12,8 @@ import com.example.data.database.AppDatabase
 import com.example.data.database.PrayerLog
 import com.example.data.database.PrayerRepository
 import com.example.data.database.TasbihItem
+import com.example.data.tasbih.TasbihRecord
+import com.example.data.tasbih.TasbihRecordRepository
 import com.example.data.prayer.*
 import com.example.data.preferences.UserPreferencesRepository
 import com.example.data.preferences.UserSettings
@@ -33,6 +35,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val db = AppDatabase.getDatabase(application, viewModelScope)
     val prayerRepository = PrayerRepository(db.prayerDao())
     val preferencesRepository = UserPreferencesRepository(application)
+    val tasbihRecordRepository = TasbihRecordRepository(application)
     private val compassSensorManager = CompassSensorManager(application)
 
     // User settings
@@ -167,6 +170,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _selectedTasbihIndex = MutableStateFlow(0)
     val selectedTasbihIndex: StateFlow<Int> = _selectedTasbihIndex.asStateFlow()
+
+    // Saved Tasbih records log
+    val savedTasbihRecords: StateFlow<List<TasbihRecord>> = tasbihRecordRepository.records
 
     // Compass
     val isCompassAvailable: Boolean = compassSensorManager.isSensorAvailable
@@ -361,6 +367,41 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun decrementTasbih() {
+        val items = tasbihItems.value
+        val index = _selectedTasbihIndex.value
+        if (index in items.indices) {
+            val item = items[index]
+            viewModelScope.launch(Dispatchers.IO) {
+                prayerRepository.decrementTasbih(item)
+                vibrate(30)
+            }
+        }
+    }
+
+    fun setTasbihTarget(target: Int) {
+        val items = tasbihItems.value
+        val index = _selectedTasbihIndex.value
+        if (index in items.indices) {
+            val item = items[index]
+            viewModelScope.launch(Dispatchers.IO) {
+                prayerRepository.setTasbihTarget(item.id, target)
+            }
+        }
+    }
+
+    fun setTasbihCount(count: Int) {
+        val items = tasbihItems.value
+        val index = _selectedTasbihIndex.value
+        if (index in items.indices) {
+            val item = items[index]
+            viewModelScope.launch(Dispatchers.IO) {
+                prayerRepository.setTasbihCount(item.id, count)
+                vibrate(50)
+            }
+        }
+    }
+
     fun resetCurrentTasbih() {
         val items = tasbihItems.value
         val index = _selectedTasbihIndex.value
@@ -370,6 +411,48 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 prayerRepository.resetTasbih(item.id)
                 vibrate(60)
             }
+        }
+    }
+
+    fun resetCurrentTasbihAndCycles() {
+        val items = tasbihItems.value
+        val index = _selectedTasbihIndex.value
+        if (index in items.indices) {
+            val item = items[index]
+            viewModelScope.launch(Dispatchers.IO) {
+                prayerRepository.resetTasbihAndCycles(item.id)
+                vibrate(80)
+            }
+        }
+    }
+
+    fun saveCurrentTasbihSession(note: String = "") {
+        val items = tasbihItems.value
+        val index = _selectedTasbihIndex.value
+        if (index in items.indices) {
+            val item = items[index]
+            viewModelScope.launch(Dispatchers.IO) {
+                tasbihRecordRepository.saveRecord(
+                    dhikrTitle = item.titleBangla,
+                    count = item.currentCount,
+                    targetCount = item.targetCount,
+                    totalCycles = item.totalCompletedCycles,
+                    note = note
+                )
+                vibratePattern(longArrayOf(0, 70, 70, 100))
+            }
+        }
+    }
+
+    fun deleteSavedTasbihRecord(id: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            tasbihRecordRepository.deleteRecord(id)
+        }
+    }
+
+    fun clearAllSavedTasbihRecords() {
+        viewModelScope.launch(Dispatchers.IO) {
+            tasbihRecordRepository.clearAllRecords()
         }
     }
 
@@ -411,7 +494,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    private fun vibratePattern(timings: LongArray) {
+    fun vibratePattern(timings: LongArray) {
         if (!userSettings.value.tasbihVibration) return
         val context = getApplication<Application>()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

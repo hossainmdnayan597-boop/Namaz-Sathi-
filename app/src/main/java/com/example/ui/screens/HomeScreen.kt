@@ -37,6 +37,7 @@ import com.example.data.calendar.DateCalendarHelper
 import com.example.ui.MainViewModel
 import com.example.ui.components.AppFooter
 import com.example.ui.components.ThreeCalendarDateCard
+import com.example.ui.theme.AmiriArabicFontFamily
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -61,6 +62,7 @@ fun HomeScreen(
 ) {
     val completedCount = todayLog?.completedCount ?: 0
     val progressPercent = (completedCount * 100) / 5
+    val isAzanPlaying by com.example.notification.AzanAlarmSoundManager.isPlaying.collectAsState()
 
     LazyColumn(
         modifier = Modifier
@@ -79,7 +81,6 @@ fun HomeScreen(
         }
 
         // Active Azan Playing Alert Banner
-        val isAzanPlaying by com.example.notification.AzanAlarmSoundManager.isPlaying.collectAsState()
         if (isAzanPlaying) {
             item {
                 Card(
@@ -979,7 +980,11 @@ private fun DailyAyahCard(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "إِنَّ الصَّلَاةَ كَانَتْ عَلَى الْمُؤْمِنِينَ كِتَابًا مَوْقُوتًا",
-                style = MaterialTheme.typography.titleMedium,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = AmiriArabicFontFamily,
+                    fontSize = 20.sp,
+                    lineHeight = 34.sp
+                ),
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSecondaryContainer

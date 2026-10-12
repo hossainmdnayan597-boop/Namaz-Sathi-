@@ -49,18 +49,37 @@ class PrayerRepository(private val prayerDao: PrayerDao) {
 
     suspend fun incrementTasbih(item: TasbihItem): Boolean {
         val newCount = item.currentCount + 1
-        val completedCycles = if (item.targetCount > 0 && newCount >= item.targetCount) {
+        val cycleCompleted = item.targetCount > 0 && newCount >= item.targetCount
+        val completedCycles = if (cycleCompleted) {
             item.totalCompletedCycles + 1
         } else {
             item.totalCompletedCycles
         }
-        val finalCount = if (item.targetCount > 0 && newCount >= item.targetCount) 0 else newCount
+        val finalCount = if (cycleCompleted) 0 else newCount
         prayerDao.updateTasbihCountAndCycles(item.id, finalCount, completedCycles)
-        return newCount >= item.targetCount && item.targetCount > 0
+        return cycleCompleted
+    }
+
+    suspend fun decrementTasbih(item: TasbihItem) {
+        if (item.currentCount > 0) {
+            prayerDao.updateTasbihCount(item.id, item.currentCount - 1)
+        }
+    }
+
+    suspend fun setTasbihCount(id: Long, count: Int) {
+        prayerDao.updateTasbihCount(id, maxOf(0, count))
+    }
+
+    suspend fun setTasbihTarget(id: Long, target: Int) {
+        prayerDao.updateTasbihTarget(id, maxOf(0, target))
     }
 
     suspend fun resetTasbih(id: Long) {
         prayerDao.updateTasbihCount(id, 0)
+    }
+
+    suspend fun resetTasbihAndCycles(id: Long) {
+        prayerDao.updateTasbihCountAndCycles(id, 0, 0)
     }
 
     suspend fun addCustomTasbih(titleBangla: String, arabic: String, meaningBangla: String, targetCount: Int): Long {

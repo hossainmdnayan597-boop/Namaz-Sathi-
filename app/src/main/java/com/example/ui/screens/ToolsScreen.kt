@@ -86,6 +86,7 @@ fun ToolsScreen(
                 )
                 1 -> TasbihScreen(
                     viewModel = viewModel,
+                    userSettings = userSettings,
                     tasbihItems = tasbihItems,
                     selectedIndex = selectedTasbihIndex
                 )

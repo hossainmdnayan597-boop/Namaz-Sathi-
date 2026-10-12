@@ -56,6 +56,9 @@ fun IslamicQuizScreen(
     var score by remember { mutableStateOf(0) }
     var isQuizFinished by remember { mutableStateOf(false) }
 
+    // Track previously answered question IDs in session to prevent repeats
+    val answeredQuestionIds = remember { mutableSetOf<Int>() }
+
     fun vibrateDevice(isCorrect: Boolean) {
         try {
             val vibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -78,7 +81,15 @@ fun IslamicQuizScreen(
     fun startNewQuiz(category: QuizCategory, count: Int) {
         selectedCategory = category
         questionCount = count
-        quizQuestions = IslamicQuizData.getRandomQuiz(category, count)
+        // Anti-repetition: exclude recently answered question IDs
+        val drawnQuestions = IslamicQuizData.getRandomQuiz(category, count, answeredQuestionIds)
+        answeredQuestionIds.addAll(drawnQuestions.map { it.id })
+        if (answeredQuestionIds.size > 160) {
+            val keep = answeredQuestionIds.toList().takeLast(60).toSet()
+            answeredQuestionIds.clear()
+            answeredQuestionIds.addAll(keep)
+        }
+        quizQuestions = drawnQuestions
         currentQuestionIndex = 0
         selectedOptionIndex = null
         isAnswerSubmitted = false
@@ -89,8 +100,10 @@ fun IslamicQuizScreen(
 
     fun startDailyChallenge() {
         selectedCategory = QuizCategory.ALL
-        quizQuestions = IslamicQuizData.getDailyQuiz()
-        questionCount = quizQuestions.size
+        val dailyQuestions = IslamicQuizData.getDailyQuiz()
+        quizQuestions = dailyQuestions
+        answeredQuestionIds.addAll(dailyQuestions.map { it.id })
+        questionCount = dailyQuestions.size
         currentQuestionIndex = 0
         selectedOptionIndex = null
         isAnswerSubmitted = false
@@ -318,18 +331,18 @@ private fun QuizSetupView(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "⭐", fontSize = 22.sp)
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                        Text(text = "⭐", fontSize = 24.sp)
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
                             Text(
-                                text = "আজকের দৈনিক কুইজ চ্যালেঞ্জ",
+                                text = "আজকের দৈনিক ৫০টি কুইজ চ্যালেঞ্জ",
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF92400E)
                             )
                             Text(
-                                text = "প্রতিদিনের ৫টি বিশেষ ইসলামিক প্রশ্ন",
+                                text = "প্রতিদিনের ৫০টি বিশেষ অনন্য ইসলামিক প্রশ্ন",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color(0xFFB45309)
                             )
@@ -344,7 +357,7 @@ private fun QuizSetupView(
                             contentColor = Color.White
                         )
                     ) {
-                        Text("শুরু করুন", fontWeight = FontWeight.Bold)
+                        Text("৫০ প্রশ্ন খেলুন", fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -428,7 +441,7 @@ private fun QuizSetupView(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                listOf(5, 10, 15).forEach { count ->
+                listOf(10, 20, 30, 50).forEach { count ->
                     val isSelected = questionCount == count
                     Surface(
                         shape = RoundedCornerShape(12.dp),
@@ -443,7 +456,7 @@ private fun QuizSetupView(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "$count টি প্রশ্ন",
+                                text = "$count টি",
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
@@ -1154,18 +1167,48 @@ private fun DailyChallengeSetupView(
                     Text(text = "🌟", fontSize = 48.sp)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "আজকের দৈনিক ইসলামিক চ্যালেঞ্জ",
+                        text = "আজকের দৈনিক ৫০টি ইসলামিক প্রশ্ন চ্যালেঞ্জ",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF92400E)
+                        color = Color(0xFF92400E),
+                        textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "প্রতিদিন নতুন ৫টি প্রশ্নের উত্তর দিয়ে দ্বীনি জ্ঞান যাচাই করুন এবং নিয়মিত ইসলামিক জ্ঞান অর্জনকে অভ্যাসে পরিণত করুন।",
+                        text = "প্রতিদিন সম্পূর্ণ নতুন ও অনন্য ৫০টি প্রশ্নের উত্তর দিয়ে দ্বীনি জ্ঞান যাচাই করুন। কোনো পুনরাবৃত্তি বা একই প্রশ্ন বারবার আসবে না!",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color(0xFFB45309),
                         textAlign = TextAlign.Center
                     )
+
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // 5-Category Distribution Badge
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFFFDE68A).copy(alpha = 0.7f),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "আজকের ৫০টি প্রশ্নের ভারসাম্যপূর্ণ বণ্টন:",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF78350F)
+                            )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "📖 কুরআন ১০ • 🕊️ নবী-রাসূল ১০ • 🕌 ইবাদত ১০ • ⚔️ ইতিহাস ১০ • 💡 সাধারণ জ্ঞান ১০",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium,
+                                color = Color(0xFF92400E),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(18.dp))
 
@@ -1177,10 +1220,12 @@ private fun DailyChallengeSetupView(
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(50.dp)
+                            .height(52.dp)
                             .testTag("start_daily_challenge_button")
                     ) {
-                        Text("৫টি প্রশ্নের চ্যালেঞ্জ শুরু করুন", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                        Icon(Icons.Default.PlayArrow, contentDescription = null)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("৫০টি প্রশ্নের দৈনিক চ্যালেঞ্জ শুরু করুন", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
                 }
             }

@@ -74,6 +74,26 @@ class ExampleUnitTest {
     assertEquals(10, randomQuiz.size)
 
     val dailyQuiz = IslamicQuizData.getDailyQuiz()
-    assertEquals(5, dailyQuiz.size)
+    assertEquals(50, dailyQuiz.size)
+    // Verify each question in dailyQuiz is unique
+    assertEquals(50, dailyQuiz.map { it.id }.toSet().size)
+  }
+
+  @Test
+  fun testTasbihRecord_CreationAndIntegrity() {
+    val record = com.example.data.tasbih.TasbihRecord(
+      dhikrTitle = "সুবহানাল্লাহ",
+      count = 33,
+      targetCount = 33,
+      totalCycles = 1,
+      note = "ফজরের পর"
+    )
+    assertEquals("সুবহানাল্লাহ", record.dhikrTitle)
+    assertEquals(33, record.count)
+    assertEquals(33, record.targetCount)
+    assertEquals(1, record.totalCycles)
+    assertEquals("ফজরের পর", record.note)
+    assertNotNull(record.id)
+    assertNotNull(record.formattedDate)
   }
 }

@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.example.data.quran.QuranData
 import com.example.data.quran.QuranSurah
 import com.example.ui.components.AppFooter
+import com.example.ui.theme.AmiriArabicFontFamily
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -296,7 +297,10 @@ private fun SurahListItemCard(
             Column(horizontalAlignment = Alignment.End) {
                 Text(
                     text = surah.nameArabic,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontFamily = AmiriArabicFontFamily,
+                        fontSize = 22.sp
+                    ),
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -426,7 +430,10 @@ private fun SurahDetailView(
                     ) {
                         Text(
                             text = surah.nameArabic,
-                            style = MaterialTheme.typography.displaySmall,
+                            style = MaterialTheme.typography.displaySmall.copy(
+                                fontFamily = AmiriArabicFontFamily,
+                                fontSize = 32.sp
+                            ),
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -531,7 +538,9 @@ private fun SurahDetailView(
                         Text(
                             text = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
                             style = MaterialTheme.typography.headlineSmall.copy(
-                                fontSize = (22 * fontSizeMultiplier).sp
+                                fontFamily = AmiriArabicFontFamily,
+                                fontSize = (24 * fontSizeMultiplier).sp,
+                                lineHeight = (42 * fontSizeMultiplier).sp
                             ),
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary,
@@ -597,8 +606,9 @@ private fun SurahDetailView(
                                         text = surah.arabicText,
                                         modifier = Modifier.padding(14.dp),
                                         style = MaterialTheme.typography.headlineSmall.copy(
-                                            fontSize = (22 * fontSizeMultiplier).sp,
-                                            lineHeight = (40 * fontSizeMultiplier).sp
+                                            fontFamily = AmiriArabicFontFamily,
+                                            fontSize = (24 * fontSizeMultiplier).sp,
+                                            lineHeight = (46 * fontSizeMultiplier).sp
                                         ),
                                         fontWeight = FontWeight.Normal,
                                         color = MaterialTheme.colorScheme.onSurface,

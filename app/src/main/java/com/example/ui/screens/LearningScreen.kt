@@ -27,6 +27,7 @@ import com.example.data.learning.LearningCategory
 import com.example.data.learning.LearningItem
 import com.example.data.learning.NamazLearningData
 import com.example.ui.components.AppFooter
+import com.example.ui.theme.AmiriArabicFontFamily
 
 @Composable
 fun LearningScreen() {
@@ -246,11 +247,14 @@ private fun LearningExpandableCard(
                         ) {
                             Text(
                                 text = item.arabicText,
-                                style = MaterialTheme.typography.headlineSmall,
+                                style = MaterialTheme.typography.headlineSmall.copy(
+                                    fontFamily = AmiriArabicFontFamily,
+                                    fontSize = 22.sp,
+                                    lineHeight = 42.sp
+                                ),
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center,
                                 color = MaterialTheme.colorScheme.primary,
-                                lineHeight = 38.sp,
                                 modifier = Modifier.padding(16.dp)
                             )
                         }

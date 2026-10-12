@@ -269,9 +269,10 @@ object QuranData {
 
     val ALL_114_SURAHS: List<QuranSurah> by lazy {
         val ammaMap = QuranJuzAmmaData.JUZ_AMMA_SURAHS.associateBy { it.number }
-        val extMap = QuranSurahExtendedData.EXTENDED_SURAHS
+        val extMap1 = QuranSurahExtendedData.EXTENDED_SURAHS
+        val extMap2 = QuranSurahExtendedData2.MORE_SURAHS
         BASE_114_SURAHS.map { base ->
-            extMap[base.number] ?: ammaMap[base.number] ?: base
+            extMap2[base.number] ?: extMap1[base.number] ?: ammaMap[base.number] ?: base
         }
     }
 

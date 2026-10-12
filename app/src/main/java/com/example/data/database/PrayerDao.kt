@@ -47,6 +47,9 @@ interface PrayerDao {
     @Query("UPDATE tasbih_items SET currentCount = :count, totalCompletedCycles = :cycles WHERE id = :id")
     suspend fun updateTasbihCountAndCycles(id: Long, count: Int, cycles: Int)
 
+    @Query("UPDATE tasbih_items SET targetCount = :target WHERE id = :id")
+    suspend fun updateTasbihTarget(id: Long, target: Int)
+
     @Query("DELETE FROM tasbih_items WHERE id = :id AND isCustom = 1")
     suspend fun deleteCustomTasbih(id: Long)
 }
